@@ -11,20 +11,22 @@ from osgeo import gdal
 import os
 
 #import data 
+bastrop_files = r"C:\Users\irisx\Documents\SEES 2019\Bastrop Files"
 
 #create dictionary for different instruments 
-ndvi_bands = {
-        'LT05' : ['SRB3', 'SRB4']
-        "LE07" : ['SRB3', 'SRB4']
+nbr_bands = {
+        'LT05' : ['SRB3', 'SRB4'],
+        'LE07' : ['SRB3', 'SRB4'],
         'LC08' : ['SRB4', 'SRB5']
 }
 #create for loop to run through all dates in time series - will do when get more data
-for date in #imported folder
+for day in os.listdir(bastrop_files):
 
     #for each date, loop through layers to get red and nir
-    layersList = [layer for layer in QgsProject.instance().mapLayers().values()]
-
-    path = "D:\Users\irisx\Documents\SEES 2019\Landsat Files\outputfile.tif"
+    for band in os.listdir(day):
+        
+        #assign bands for nir and swir
+        
     entries = []
 
 # Define band1
@@ -47,6 +49,7 @@ calc.processCalculation()
 
 #export the map layer as a geotiff, then open on qgis 
 iface.addRasterLayer(path, output)
+    
     
 
 
