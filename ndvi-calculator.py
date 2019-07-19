@@ -9,6 +9,7 @@ output statistics into another file
 from qgis.analysis import QgsRasterCalculator, QgsRasterCalculatorEntry
 from osgeo import gdal
 import os
+import processing
 
 #import data 
 bastrop_files = r"C:/Users/irisx/Documents/SEES 2019/Bastrop Files"
@@ -44,44 +45,28 @@ for date in os.listdir(bastrop_files):
     #for each date, loop through layers to get red and nir
     for band in os.listdir(day):
         
+        band_path = day + '/' + band
+
         #assign bands for nir and red
         if (ndvi_bands[satellite][0] in band):
-            red = gdal.Open(band)
-            redband = red.GetRasterBand(1)
+            red = QgsRasterLayer(band_path)
         elif (ndvi_bands[satellite][1] in band):
-            nir = gdal.Open(band)
-            nirband = nir.GetRasterBand(1)
+            nir = QgsRasterLayer(band_path)
           
-    #make entries list for raster calculator
-    entries = []
-    
     #make output path for this date
-    output_path = output + "/" + date
-        
-    # Define red entry
-    red1 = QgsRasterCalculatorEntry()
-    red1.ref = 'band@3'
-    red1.raster = redband
-    red1.bandNumber = 3
-    entries.append(red)
+    output_raster = output + "/" + date
     
-    # Define nir entry
-    nir1 = QgsRasterCalculatorEntry()
-    nir1.ref = 'band@4'
-    nir1.raster = nirband
-    nir.bandNumber = 4
-    entries.append(nir)
+    #parameters for calculation
+    parameters = {
+        'INPUT_A' : red,
+        'BAND_A' : 1,
+        'INPUT_B' : nir,
+        'BAND_B' : 1,
+        'FORMULA' : '((B - A)/(B + A)) * 1000',
+        'OUTPUT' : output_raster + '.tif'}
+
+    calc = processing.runAndLoadResults('gdal:rastercalculator', parameters)
     
-    ###layer = hypothetical raster layer that needs to be made from the dataset and bands from gdal
-    
-    # perform calculation
-    calc = QgsRasterCalculator( '((band@4 - band@3)/(band@4 + band@3)) * 1000', output_path, 'GTiff', layer.extent(), layer.width(), layer.height(), entries )
-    calc.processCalculation()
-    
-    #add raster layer to qgis
-    iface.addRasterLayer(output_path, layer)
-    
-    ##need to output statistics file as well
     
     
 
