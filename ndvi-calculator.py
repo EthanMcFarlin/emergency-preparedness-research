@@ -1,15 +1,18 @@
+# -*- coding: utf-8 -*-
 """
-Created on Wednesday July 17 
+Created on Fri Jul 19 15:31:55 2019
 @author: Iris Xia
-goal: write a script to map NDVI values for Landsat data
-output calculated NDVI into a raster layer
-output statistics into another file
-
+goal: try using numpy arrays to calculate and get the ndvi calculation
 """
+
 from qgis.analysis import QgsRasterCalculator, QgsRasterCalculatorEntry
 from osgeo import gdal
 import os
 import processing
+import numpy
+from osgeo.gdalnumeric import *
+from osgeo.gdalconst import *
+
 
 #import data 
 bastrop_files = r"C:/Users/irisx/Documents/SEES 2019/Bastrop Files"
@@ -45,32 +48,34 @@ for date in os.listdir(bastrop_files):
     #for each date, loop through layers to get red and nir
     for band in os.listdir(day):
         
-        band_path = day + '/' + band
-
-        #assign bands for nir and red
-        if (ndvi_bands[satellite][0] in band):
-            red = QgsRasterLayer(band_path)
-        elif (ndvi_bands[satellite][1] in band):
-            nir = QgsRasterLayer(band_path)
-          
+        if (band.endswith('tif')):
+            
+            #create band path to open file
+            band_path = day + '/' + band
+    
+            #assign bands for nir and red
+            if (ndvi_bands[satellite][0] in band):
+                red = gdal.Open(band_path)
+                redband = red.GetRasterBand(1)
+            elif (ndvi_bands[satellite][1] in band):
+                nir = gdal.Open(band_path)
+                nirband = nir.GetRasterBand(1)
+    
     #make output path for this date
-    output_raster = output + "/" + date
+    output_path = output + "/" + date + '.tif'
     
-    #parameters for calculation
-    parameters = {
-        'INPUT_A' : red,
-        'BAND_A' : 1,
-        'INPUT_B' : nir,
-        'BAND_B' : 1,
-        'FORMULA' : '((B - A)/(B + A)) * 1000',
-        'OUTPUT' : output_raster + '.tif'}
-
-    calc = processing.runAndLoadResults('gdal:rastercalculator', parameters)
+    redarr = BandReadAsArray(redband)
+    nirarr = BandReadAsArray(nirband)
     
+    #calculation
+    ndvi = ((nirarr - redarr)/(nirarr + redarr)) * 1000
     
-    
-
-
+    #driver for out file
+    driver = gdal.GetDriverByName("GTiff")
+    output_driver = driver.Create(output_path, red.RasterXSize, red.RasterYSize, 1, redband.DataType)
+    CopyDatasetInfo(red, output_driver)
+    output_band = output_driver.GetRasterBand(1)
+    output_band.WriteArray(ndvi)
 
 
 
