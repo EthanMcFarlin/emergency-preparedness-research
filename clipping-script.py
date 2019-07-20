@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Jul 18 2019
+@author: Sean Yang
+goal: Clipping raster files using two georeferenced coordinate points, then outputting to a new directory structure
+"""
+
 
 '''INPUT VARIABLES'''
 
