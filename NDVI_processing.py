@@ -20,7 +20,7 @@ for ndvi in os.listdir(ndvi_files):
     date = ndvi[:-4]
     
     #create raster layer for each
-    ndvi_raster = QgsRasterLayer(ndvi_files + “/“ + ndvi)
+    ndvi_raster = QgsRasterLayer(ndvi_files + "/" + ndvi)
     
     #run stats for raster layer
     stats = ndvi_raster.dataProvider().bandStatistics(1, QgsRasterBandStats.All)     
